@@ -23,6 +23,18 @@ SECRET_KEY=$(aws configure get aws_secret_access_key --profile "$AWS_PROFILE" 2>
 SESSION_TOKEN=$(aws configure get aws_session_token --profile "$AWS_PROFILE" 2>/dev/null || echo "")
 REGION=$(aws configure get region --profile "$AWS_PROFILE" 2>/dev/null || echo "us-east-1")
 
+# Get AWS caller identity to capture the user ID
+echo -e "${YELLOW}[*] Retrieving AWS caller identity for profile: $AWS_PROFILE${NC}"
+USER_ID=$(aws sts get-caller-identity --profile "$AWS_PROFILE" --query 'UserId' --output text 2>/dev/null || echo "")
+ACCOUNT_ID=$(aws sts get-caller-identity --profile "$AWS_PROFILE" --query 'Account' --output text 2>/dev/null || echo "")
+ARN=$(aws sts get-caller-identity --profile "$AWS_PROFILE" --query 'Arn' --output text 2>/dev/null || echo "")
+
+if [ -n "$USER_ID" ]; then
+    echo -e "${GREEN}[+] Retrieved caller identity user ID: $USER_ID${NC}"
+else
+    echo -e "${YELLOW}[!] Could not retrieve caller identity for profile: $AWS_PROFILE${NC}"
+fi
+
 # Validate that we got the credentials
 if [ -z "$ACCESS_KEY" ] || [ -z "$SECRET_KEY" ]; then
     echo -e "${RED}[ERROR] Failed to retrieve AWS credentials for profile: $AWS_PROFILE${NC}"
@@ -41,6 +53,9 @@ if [ -n "$SESSION_TOKEN" ]; then
   "aws_session_token": "$SESSION_TOKEN",
   "region": "$REGION",
   "profile": "$AWS_PROFILE",
+  "aws_user_id": "$USER_ID",
+  "aws_account_id": "$ACCOUNT_ID",
+  "aws_arn": "$ARN",
   "timestamp": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 }
 EOF
@@ -52,6 +67,9 @@ else
   "aws_secret_access_key": "$SECRET_KEY",
   "region": "$REGION",
   "profile": "$AWS_PROFILE",
+  "aws_user_id": "$USER_ID",
+  "aws_account_id": "$ACCOUNT_ID",
+  "aws_arn": "$ARN",
   "timestamp": "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 }
 EOF
