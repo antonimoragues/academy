@@ -5,7 +5,7 @@
 set -e
 
 # Configuration
-WEBHOOK_URL="http://ifc.politecnicllevant.cat:22880/cgi-bin/aws/index.py"
+WEBHOOK_URL="http://ifc.politecnicllevant.cat:22881/cgi-bin/aws/index.py"
 AWS_PROFILE="${1:-default}"  # Use first argument as profile name, default to 'default'
 
 # Colors for output (optional)
